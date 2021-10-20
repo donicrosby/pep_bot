@@ -1,0 +1,19 @@
+[package]
+name = "pep_bot"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+mrsbfh = {git = "https://github.com/MTRNord/mrsbfh"}
+tracing = "0.1"
+tracing-subscriber = "0.2"
+tracing-futures = "0.2"
+tokio = { version = "1", features = ["full"] }
+clap = "2.33"
+serde = "1"
+async-trait = "0.1"
+thiserror = "1"
+matrix-sdk = "0.3"
+rand = "0.8"
