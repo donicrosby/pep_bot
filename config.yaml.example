@@ -1,6 +1,7 @@
 homeserver_url: "matrix.org"
 mxid: ""
 password: ""
+avatar: "mxc://jeansburger.net/661d7405e878b1d9286aaf30575bf6cadc2e147b"
 store_path: "./store"
 session_path: "./session"
 pep_config:

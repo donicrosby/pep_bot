@@ -4,7 +4,6 @@ use crate::config::Config;
 use mrsbfh::config::Loader;
 use clap::{crate_version, App, Arg};
 use std::error::Error;
-use tokio;
 use tracing::*;
 
 mod matrix;
@@ -15,6 +14,7 @@ mod errors;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {
     tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
         .pretty()
         .with_thread_names(true)
         .init();
