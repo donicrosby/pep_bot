@@ -6,6 +6,7 @@ use std::borrow::Cow;
 pub struct Config<'a> {
     pub homeserver_url: Cow<'a, str>,
     pub mxid: Cow<'a, str>,
+    pub avatar: Cow<'a, str>,
     pub password: Cow<'a, str>,
     pub store_path: Cow<'a, str>,
     pub session_path: Cow<'a, str>,

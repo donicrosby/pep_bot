@@ -2,6 +2,7 @@ use crate::config::Config;
 use matrix_sdk::{Client, ClientConfig, Session as SDKSession, SyncSettings};
 use mrsbfh::url::Url;
 use mrsbfh::utils::Session;
+use matrix_sdk::identifiers::MxcUri;
 use std::convert::TryFrom;
 use std::error::Error;
 use std::fs;
@@ -64,6 +65,30 @@ pub async fn setup(config: Config<'_>) -> Result<Client, Box<dyn Error>> {
     }
 
     info!("logged in as {}", config.mxid);
+    info!("Updating bot avatar if needed...");
+    let avatar_uri = config.avatar.to_string();
+    let cur_avatar_uri = client.avatar_url().await?;
+    if !avatar_uri.is_empty() {
+        debug!("Config Avatar is not empty...");
+        let avatar_uri = MxcUri::from(avatar_uri);
+        if avatar_uri.is_valid() {
+            debug!("Config Avatar is valid...");
+            match cur_avatar_uri {
+                Some(cur) => {
+                    if avatar_uri != cur {
+                        info!("Updating Avatar!");
+                        client.set_avatar_url(Some(&avatar_uri)).await?;
+                    } else {
+                        info!("Avatar is the same as in the config not updating...");
+                    }
+                },
+                None => {
+                    info!("Updating Avatar!");
+                    client.set_avatar_url(Some(&avatar_uri)).await?;
+                }
+            }
+        }
+    }
 
     Ok(client)
 }
