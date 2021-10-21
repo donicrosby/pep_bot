@@ -1,3 +1,4 @@
+extern crate lazy_static;
 extern crate clap;
 use crate::config::Config;
 use mrsbfh::config::Loader;

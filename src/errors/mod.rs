@@ -7,4 +7,6 @@ pub enum Error {
     SendError(#[from] tokio::sync::mpsc::error::SendError<AnyMessageEventContent>),
     #[error("Could not get valid value from pep component list {0}")]
     PepChoiceError(String),
+    #[error("About You string was empty!")]
+    AboutYouEmpty,
 }
