@@ -7,10 +7,16 @@ use mrsbfh::commands::command;
 use matrix_sdk::Client;
 use rand::{seq::IteratorRandom, thread_rng};
 use std::borrow::Cow;
+use std::collections::HashMap;
+use tokio::sync::RwLock;
 use tracing::*;
 
 lazy_static! {
-    static ref LEADIN_REGEX: Regex = Regex::new(r"^(?:[\w\s]+)(\.{1,3}|[:?!])$").unwrap();
+    static ref LEADIN_REGEX: Regex = Regex::new(r"^(?:[\w\s,]+)(\.{1,3}|[:?!])$").unwrap();
+    static ref DUP_MANAGER: RwLock<HashMap<String, String>> = {
+        let map = HashMap::new();
+        RwLock::new(map)
+    };
 }
 
 #[command(help = "`!pep` - Gives you a randomized pep talk when you need it!")]
@@ -33,15 +39,22 @@ where
     Ok(())
 }
 
-fn choose_from_vec<'a>(config_name: &str, choices: &[Cow<'a, str>]) -> Result<String, Error> {
+async fn choose_from_vec(config_name: String, choices: &[Cow<'_, str>]) -> Result<String, Error> {
     debug!("Getting pep fragrment from {}", config_name);
-    let mut rng = thread_rng();
     if !choices.is_empty() {
         debug!("List of options isn't empty picking one at random...");
-        Ok(choices.iter().choose(&mut rng).unwrap().to_string())
+        let mut choice = choices.iter().choose(&mut thread_rng()).unwrap().to_string();
+        if let Some(already_used) = DUP_MANAGER.read().await.get(&config_name) {
+            while choice.eq(already_used) {
+                debug!("I already used that in a response earlier, picking new item...");
+                choice = choices.iter().choose(&mut thread_rng()).unwrap().to_string();
+            }
+        }
+        DUP_MANAGER.write().await.insert(config_name, choice.clone());
+        Ok(choice)
     } else {
         error!("List of options is empty? Please fix that...");
-        Err(Error::PepChoiceError(String::from(config_name)))
+        Err(Error::PepChoice(config_name))
     }
 }
 
@@ -58,10 +71,10 @@ async fn create_pep<'a>(config: &Config<'a>) -> Result<String, Error>
         Config<'a>: mrsbfh::config::Loader + Clone,
 {
     info!("Generating Pep...");
-    let leadin = choose_from_vec("lead-ins", &config.pep_config.lead_ins)?;
-    let mut about_you = choose_from_vec("about_yous", &config.pep_config.about_yous)?;
-    let complement = choose_from_vec("compliments", &config.pep_config.complements)?;
-    let ending = choose_from_vec("endings", &config.pep_config.endings)?;
+    let leadin = choose_from_vec("lead-ins".to_owned(), &config.pep_config.lead_ins).await?;
+    let mut about_you = choose_from_vec("about_yous".to_owned(), &config.pep_config.about_yous).await?;
+    let complement = choose_from_vec("compliments".to_owned(), &config.pep_config.complements).await?;
+    let ending = choose_from_vec("endings".to_owned(), &config.pep_config.endings).await?;
 
     if LEADIN_REGEX.is_match(leadin.as_str()) {
         about_you = uppercase_about_you(about_you.as_str())?;
