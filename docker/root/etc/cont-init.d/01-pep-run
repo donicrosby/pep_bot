@@ -1,0 +1,6 @@
+#!/usr/bin/with-contenv bash
+set -e
+export CONFIG_PATH=${CONFIG:-/pep_bot/config.yaml}
+export RUST_LOG=${LOG:-info}
+
+exec pep_bot

@@ -1,0 +1,11 @@
+version: '3'
+services:
+  pepbot:
+    image: pep_bot:latest
+    build:
+      context: ../
+      dockerfile: docker/Dockerfile
+      args:
+        RUST_BUILDER_TAG: nightly-bullseye
+        PROD_IMAGE_TAG: focal
+        S6_OVERLAY_VERSION: v2.2.0.3
