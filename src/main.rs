@@ -31,6 +31,7 @@ async fn main() -> Result<(), Box<dyn Error>> {
                 .long("config")
                 .value_name("FILE")
                 .default_value("config.yml")
+                .env("CONFIG_PATH")
                 .takes_value(true)
                 .help("Configuration file for logging into a matrix homeserver"),
         )
