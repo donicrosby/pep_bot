@@ -3,4 +3,4 @@ set -e
 export CONFIG_PATH=${CONFIG:-/pep_bot/config.yaml}
 export RUST_LOG=${LOG:-info}
 
-exec pep_bot
+exec pep_bot -c "$CONFIG_PATH"

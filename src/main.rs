@@ -1,15 +1,15 @@
-extern crate lazy_static;
 extern crate clap;
+extern crate lazy_static;
 use crate::config::Config;
-use mrsbfh::config::Loader;
 use clap::{crate_version, App, Arg};
+use mrsbfh::config::Loader;
 use std::error::Error;
 use tracing::*;
 
-mod matrix;
-mod config;
 mod commands;
+mod config;
 mod errors;
+mod matrix;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn Error>> {

@@ -1,11 +1,14 @@
 use crate::config::Config;
 use crate::errors::Error;
-use lazy_static::lazy_static;
-use regex::Regex;
-use matrix_sdk::events::{room::message::MessageEventContent, AnyMessageEventContent};
-use mrsbfh::commands::command;
+use matrix_sdk::events::{
+    room::message::{MessageEventContent, MessageType, TextMessageEventContent},
+    AnyMessageEventContent,
+};
 use matrix_sdk::Client;
+use mrsbfh::commands::command;
+use mrsbfh::lazy_static;
 use rand::{seq::IteratorRandom, thread_rng};
+use regex::Regex;
 use std::borrow::Cow;
 use std::collections::HashMap;
 use tokio::sync::RwLock;
@@ -32,8 +35,9 @@ where
 {
     let pep = create_pep(&config).await?;
 
-    let content =
-        AnyMessageEventContent::RoomMessage(MessageEventContent::text_plain(pep));
+    let content = AnyMessageEventContent::RoomMessage(MessageEventContent::new(MessageType::Text(
+        TextMessageEventContent::markdown(&pep),
+    )));
 
     tx.send(content).await?;
     Ok(())
@@ -43,14 +47,25 @@ async fn choose_from_vec(config_name: String, choices: &[Cow<'_, str>]) -> Resul
     debug!("Getting pep fragrment from {}", config_name);
     if !choices.is_empty() {
         debug!("List of options isn't empty picking one at random...");
-        let mut choice = choices.iter().choose(&mut thread_rng()).unwrap().to_string();
+        let mut choice = choices
+            .iter()
+            .choose(&mut thread_rng())
+            .unwrap()
+            .to_string();
         if let Some(already_used) = DUP_MANAGER.read().await.get(&config_name) {
             while choice.eq(already_used) {
                 debug!("I already used that in a response earlier, picking new item...");
-                choice = choices.iter().choose(&mut thread_rng()).unwrap().to_string();
+                choice = choices
+                    .iter()
+                    .choose(&mut thread_rng())
+                    .unwrap()
+                    .to_string();
             }
         }
-        DUP_MANAGER.write().await.insert(config_name, choice.clone());
+        DUP_MANAGER
+            .write()
+            .await
+            .insert(config_name, choice.clone());
         Ok(choice)
     } else {
         error!("List of options is empty? Please fix that...");
@@ -58,22 +73,24 @@ async fn choose_from_vec(config_name: String, choices: &[Cow<'_, str>]) -> Resul
     }
 }
 
-fn uppercase_about_you(s: &str) -> Result<String,Error> {
+fn uppercase_about_you(s: &str) -> Result<String, Error> {
     let mut c = s.chars();
     match c.next() {
         None => Err(Error::AboutYouEmpty),
-        Some(f) => Ok(f.to_uppercase().collect::<String>() + c.as_str())
+        Some(f) => Ok(f.to_uppercase().collect::<String>() + c.as_str()),
     }
 }
 
 async fn create_pep<'a>(config: &Config<'a>) -> Result<String, Error>
-    where
-        Config<'a>: mrsbfh::config::Loader + Clone,
+where
+    Config<'a>: mrsbfh::config::Loader + Clone,
 {
     info!("Generating Pep...");
     let leadin = choose_from_vec("lead-ins".to_owned(), &config.pep_config.lead_ins).await?;
-    let mut about_you = choose_from_vec("about_yous".to_owned(), &config.pep_config.about_yous).await?;
-    let complement = choose_from_vec("compliments".to_owned(), &config.pep_config.complements).await?;
+    let mut about_you =
+        choose_from_vec("about_yous".to_owned(), &config.pep_config.about_yous).await?;
+    let complement =
+        choose_from_vec("compliments".to_owned(), &config.pep_config.complements).await?;
     let ending = choose_from_vec("endings".to_owned(), &config.pep_config.endings).await?;
 
     if LEADIN_REGEX.is_match(leadin.as_str()) {

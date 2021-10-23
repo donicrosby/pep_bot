@@ -6,8 +6,10 @@ use matrix_sdk::{
         room::member::MemberEventContent, room::message::MessageEventContent, StrippedStateEvent,
         SyncMessageEvent,
     },
-    Client, EventHandler, room::Room,
+    room::Room,
+    Client, EventHandler,
 };
+use mrsbfh::lazy_static;
 use tokio::sync::mpsc;
 use tracing::*;
 
@@ -37,5 +39,6 @@ impl EventHandler for Bot {
         room: Room,
         room_member: &StrippedStateEvent<MemberEventContent>,
         _: Option<MemberEventContent>,
-    ) {}
+    ) {
+    }
 }
