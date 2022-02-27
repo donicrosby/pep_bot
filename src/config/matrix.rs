@@ -10,12 +10,12 @@ pub struct Config<'a> {
     pub password: Cow<'a, str>,
     pub store_path: Cow<'a, str>,
     pub session_path: Cow<'a, str>,
-    pub pep_config: PepConfig<'a>
+    pub pep_config: PepConfig<'a>,
 }
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
 pub struct PepConfig<'a> {
     pub lead_ins: Vec<Cow<'a, str>>,
     pub about_yous: Vec<Cow<'a, str>>,
     pub complements: Vec<Cow<'a, str>>,
-    pub endings: Vec<Cow<'a, str>>
+    pub endings: Vec<Cow<'a, str>>,
 }

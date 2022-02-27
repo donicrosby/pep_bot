@@ -1,6 +1,6 @@
-ARG RUST_BUILDER_TAG=nightly-bullseye
-ARG PROD_IMAGE_TAG=focal
-ARG S6_OVERLAY_VERSION=v2.2.0.3
+ARG RUST_BUILDER_TAG
+ARG PROD_IMAGE_TAG
+ARG S6_OVERLAY_VERSION
 FROM rustlang/rust:${RUST_BUILDER_TAG} as builder
 RUN apt-get update && apt-get -y install cmake libssl-dev
 WORKDIR build

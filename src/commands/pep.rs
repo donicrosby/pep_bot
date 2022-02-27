@@ -1,17 +1,21 @@
 use crate::config::Config;
 use crate::errors::Error;
-use matrix_sdk::events::{
-    room::message::{MessageEventContent, MessageType, TextMessageEventContent},
-    AnyMessageEventContent,
+use lazy_static::lazy_static;
+use matrix_sdk::{
+    ruma::{
+        events::{
+            room::message::{MessageEventContent, MessageType, TextMessageEventContent},
+            AnyMessageEventContent,
+        },
+        RoomId,
+    },
+    Client,
 };
-use matrix_sdk::Client;
 use mrsbfh::commands::command;
-use mrsbfh::lazy_static;
 use rand::{seq::IteratorRandom, thread_rng};
 use regex::Regex;
-use std::borrow::Cow;
-use std::collections::HashMap;
-use tokio::sync::RwLock;
+use std::{borrow::Cow, collections::HashMap, sync::Arc};
+use tokio::sync::{Mutex, RwLock};
 use tracing::*;
 
 lazy_static! {
@@ -26,14 +30,15 @@ lazy_static! {
 pub async fn pep<'a>(
     _client: Client,
     tx: mrsbfh::Sender,
-    config: Config<'a>,
+    config: Arc<Mutex<Config<'a>>>,
     _sender: String,
+    _room_id: RoomId,
     mut _args: Vec<&str>,
 ) -> Result<(), Error>
 where
     Config<'a>: mrsbfh::config::Loader + Clone,
 {
-    let pep = create_pep(&config).await?;
+    let pep = create_pep(&*config.lock().await).await?;
 
     let content = AnyMessageEventContent::RoomMessage(MessageEventContent::new(MessageType::Text(
         TextMessageEventContent::markdown(&pep),
