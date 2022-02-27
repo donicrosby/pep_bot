@@ -1,7 +1,7 @@
-ARG RUST_BUILDER_TAG
+ARG RUST_BUILDER
 ARG PROD_IMAGE_TAG
 ARG S6_OVERLAY_VERSION
-FROM rustlang/rust:${RUST_BUILDER_TAG} as builder
+FROM ${RUST_BUILDER} as builder
 RUN apt-get update && apt-get -y install cmake libssl-dev
 WORKDIR build
 COPY Cargo.toml .

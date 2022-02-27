@@ -6,6 +6,6 @@ services:
       context: ../
       dockerfile: docker/Dockerfile
       args:
-        RUST_BUILDER_TAG: 1.59.0-bullseye
+        RUST_BUILDER: rust:1.59.0-bullseye
         PROD_IMAGE_TAG: focal
         S6_OVERLAY_VERSION: v2.2.0.3
